@@ -15,7 +15,25 @@ ENTRY = (
 )
 
 
+MAX_CHARS = 200
+
+
+def _validate(entry):
+    """Keep the review inside the brief: one sentence, at most 200 chars."""
+    text = entry.strip()
+    if len(text) > MAX_CHARS:
+        raise ValueError(f"entry is {len(text)} chars, over the 200-char cap")
+    if text.count(".") != 1 or not text.endswith("."):
+        raise ValueError("entry must be exactly one sentence")
+    return text
+
+
 def main():
+    try:
+        entry = _validate(ENTRY)
+    except ValueError as exc:
+        print(f"Invalid entry: {exc}")
+        return 1
     try:
         os.makedirs("/output", exist_ok=True)
     except OSError:
@@ -23,14 +41,14 @@ def main():
     path = "/output/entry.txt"
     try:
         with open(path, "w", encoding="utf-8") as f:
-            f.write(ENTRY)
+            f.write(entry)
         os.chmod(path, 0o644)
     except OSError as exc:
         print(f"Could not write {path}: {exc}")
-        print(ENTRY)
+        print(entry)
         return
-    print(f"Wrote {len(ENTRY)} characters to {path}")
-    print(ENTRY)
+    print(f"Wrote {len(entry)} characters to {path}")
+    print(entry)
 
 
 if __name__ == "__main__":
